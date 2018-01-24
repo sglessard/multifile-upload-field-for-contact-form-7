@@ -19,8 +19,11 @@
 add_action( 'wpcf7_init', 'wpcf7_add_shortcode_multifile' );
 
 function wpcf7_add_shortcode_multifile() {
-	wpcf7_add_shortcode( array( 'multifile', 'multifile*' ),
-		'wpcf7_multifile_shortcode_handler', true );
+   if (function_exists('wpcf7_add_form_tag')) {
+       wpcf7_add_form_tag( array( 'multifile', 'multifile*' ),'wpcf7_multifile_shortcode_handler', true );
+   } else {
+       wpcf7_add_shortcode( array( 'multifile', 'multifile*' ),'wpcf7_multifile_shortcode_handler', true );
+   }
 }
 
 function wpcf7_multifile_shortcode_handler( $tag ) {
@@ -79,7 +82,11 @@ function wpcf7_multifile_shortcode_handler( $tag ) {
 add_filter( 'wpcf7_form_enctype', 'wpcf7_multifile_form_enctype_filter' );
 
 function wpcf7_multifile_form_enctype_filter( $enctype ) {
-	$multipart = (bool) wpcf7_scan_shortcode( array( 'type' => array( 'multifile', 'multifile*' ) ) );
+    if (function_exists('wpcf7_scan_form_tags')) {
+        $multipart = (bool) wpcf7_scan_form_tags( array( 'type' => array( 'multifile', 'multifile*' ) ) );
+    } else {
+        $multipart = (bool) wpcf7_scan_shortcode( array( 'type' => array( 'multifile', 'multifile*' ) ) );
+    }
 
 	if ( $multipart ) {
 		$enctype = 'multipart/form-data';
@@ -391,8 +398,14 @@ function wpcf7_multifile_display_warning_message() {
 		return;
 	}
 
-	$has_tags = (bool) $contact_form->form_scan_shortcode(
-		array( 'type' => array( 'multifile', 'multifile*' ) ) );
+	if (method_exists($contact_form, 'scan_form_tags')) {
+	    $has_tags = (bool) $contact_form->scan_form_tags(
+		    array( 'type' => array( 'multifile', 'multifile*' ) ) );
+    } else {
+	    $has_tags = (bool) $contact_form->form_scan_shortcode(
+		    array( 'type' => array( 'multifile', 'multifile*' ) ) );
+    }
+	
 
 	if ( ! $has_tags ) {
 		return;
